@@ -42,6 +42,8 @@ const BigInt MAX_BIG_UINT = ULLONG_MAX;
 
 typedef std::vector<bool> BoolList;
 
+#define BigIntAbs(bi) llabs(bi)
+
 
 ////////////////////////////
 // Factorization
