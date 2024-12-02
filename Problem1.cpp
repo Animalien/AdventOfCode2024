@@ -11,8 +11,8 @@ public:
 
     virtual void Run() override
     {
-        RunThing("Day1Example.txt", true);
-        RunThing("Day1Input.txt", false);
+        RunOnData("Day1Example.txt", true);
+        RunOnData("Day1Input.txt", false);
     }
 
 private:
@@ -29,9 +29,9 @@ private:
         }
     }
 
-    void RunThing(const char* filename, bool verbose)
+    void RunOnData(const char* filename, bool verbose)
     {
-        printf("Working on '%s':\n", filename);
+        printf("Running on data in file '%s':\n", filename);
 
         StringList lines;
         ReadFileLines(filename, lines);

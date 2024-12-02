@@ -1,17 +1,17 @@
 ///////////////////////////
-// Problem # - Name
+// Problem 2 - Red-Nosed Reports
 
 #include "AdventOfCode2024.h"
 
-class Problem# : public ProblemBase
+class Problem2 : public ProblemBase
 {
 public:
-    virtual int GetProblemNum() const override { return #; }
+    virtual int GetProblemNum() const override { return 2; }
 
     virtual void Run() override
     {
-        RunOnData("Day#Example.txt", true);
-        //RunOnData("Day#Input.txt", false);
+        RunOnData("Day2Example.txt", true);
+        //RunOnData("Day2Input.txt", false);
     }
 
 private:
@@ -24,4 +24,4 @@ private:
     }
 };
 
-Problem# problem#;
+Problem2 problem2;
