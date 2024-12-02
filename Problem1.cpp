@@ -16,6 +16,19 @@ public:
     }
 
 private:
+    void IncrementNumberCountInMap(BigIntMap& map, BigInt num)
+    {
+        BigIntMap::iterator mapFindIter = map.find(num);
+        if (mapFindIter != map.end())
+        {
+            ++(mapFindIter->second);
+        }
+        else
+        {
+            map.insert(BigIntMap::value_type(num, 1));
+        }
+    }
+
     void RunThing(const char* filename, bool verbose)
     {
         printf("Working on '%s':\n", filename);
@@ -24,6 +37,8 @@ private:
         ReadFileLines(filename, lines);
 
         BigIntList leftList, rightList;
+        BigIntMap leftCountMap, leftRightCountMap;
+        BigIntMultiSet rightNumberSet;
 
         for (const std::string& line: lines)
         {
@@ -31,25 +46,50 @@ private:
             ParseBigIntList(line, intList, ' ');
             leftList.push_back(intList[0]);
             rightList.push_back(intList[1]);
-        }
 
-        std::sort(leftList.begin(), leftList.end());
-        std::sort(rightList.begin(), rightList.end());
+            IncrementNumberCountInMap(leftCountMap, intList[0]);
+            IncrementNumberCountInMap(leftRightCountMap, intList[1]);
+            rightNumberSet.insert(intList[1]);
+        }
 
         BigInt sumDists = 0;
 
-        for (BigInt i = 0; i < (BigInt)leftList.size(); ++i)
+        BigIntMap::const_iterator leftCountMapIter = leftCountMap.cbegin();
+        BigIntMultiSet::const_iterator rightNumberSetIter = rightNumberSet.cbegin();
+        
+        for (; leftCountMapIter != leftCountMap.cend(); ++leftCountMapIter, ++rightNumberSetIter)
         {
-            const BigInt dist = BigIntAbs(leftList[i] - rightList[i]);
+            const BigInt dist = BigIntAbs(leftCountMapIter->first - *rightNumberSetIter);
             sumDists += dist;
 
             if (verbose)
-                printf("dist between %lld and %lld = %lld, sumDists = %lld\n", leftList[i], rightList[i], dist, sumDists);
+            {
+                printf(
+                    "dist between %lld and %lld = %lld, sumDists = %lld\n",
+                    leftCountMapIter->first,
+                    *rightNumberSetIter,
+                    dist,
+                    sumDists);
+            }
         }
 
         printf("Sum dists = %lld\n\n", sumDists);
-    }
 
+        BigInt totalSimilarityScore = 0;
+
+        for (const BigIntMap::value_type& pair: leftCountMap)
+        {
+            const BigInt leftRightCount = leftRightCountMap[pair.first];
+            const BigInt simScore = pair.first * pair.second * leftRightCount;
+            totalSimilarityScore += simScore;
+            if (verbose)
+                printf(
+                    "left value %lld shows up in left column %lld times and right column %lld times, so similarity score = %lld, total sim score = %lld\n",
+                    pair.first, pair.second, leftRightCount, simScore, totalSimilarityScore);
+        }
+
+        printf("Total similarity score = %lld\n\n", totalSimilarityScore);
+    }
 };
 
 Problem1 problem1;

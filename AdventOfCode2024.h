@@ -31,6 +31,7 @@ typedef std::vector<BigIntList> BigIntListList;
 typedef std::map<BigInt, BigInt> BigIntMap;
 typedef std::unordered_map<BigInt, BigInt> BigIntUnorderedMap;
 typedef std::set<BigInt> BigIntSet;
+typedef std::multiset<BigInt> BigIntMultiSet;
 typedef std::unordered_set<BigInt> BigIntUnorderedSet;
 typedef std::deque<BigInt> BigIntDeque;
 
