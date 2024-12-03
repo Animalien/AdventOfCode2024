@@ -15,21 +15,15 @@ public:
     }
 
 private:
-    void ProcessOneReport(const std::string& report, bool& isSafe, bool verbose)
+    void ProcessOneReport(const BigIntList& reportNumList, bool& isSafe, bool verbose)
     {
-        if (verbose)
-            printf("working on report: %s\n", report.c_str());
-
-        BigIntList intList;
-        ParseBigIntList(report, intList, ' ');
-
         isSafe = true;
 
         bool readFirstNum = false;
         bool determinedDirection = false;
         bool dirIsRising = false;
         BigInt prevNum = 0;
-        for (BigInt num: intList)
+        for (BigInt num: reportNumList)
         {
             if (readFirstNum)
             {
@@ -83,16 +77,78 @@ private:
         ReadFileLines(filename, lines);
 
         BigInt numSafeReports = 0;
+        BigInt numSafeReportsWithDampener = 0;
+
+        BigIntList reportNumList;
+        BigIntList altReportNumList;
+
         for (const std::string& line: lines)
         {
             bool isSafe = false;
-            ProcessOneReport(line, isSafe, verbose);
+            bool isSafeWithProblemDampener = false;
+
+            if (verbose)
+                printf("working on report: %s\n", line.c_str());
+
+            BigIntList intList;
+            ParseBigIntList(line, reportNumList, ' ');
+
+            ProcessOneReport(reportNumList, isSafe, verbose);
 
             if (isSafe)
+            {
+                // safe is safe!
+
                 ++numSafeReports;
+                ++numSafeReportsWithDampener;
+
+                if (verbose)
+                    printf("just plain SAFE\n");
+            }
+            else
+            {
+                // see if we can eke out a with-dampener safety (omitting a single entry)
+
+                altReportNumList = reportNumList;
+                altReportNumList.pop_back();
+
+                BigInt indexToPatch = altReportNumList.size() - 1;
+                for (;;)
+                {
+                    if (verbose)
+                    {
+                        printf("working on snipped version of report: ");
+                        for (BigInt num: altReportNumList)
+                        {
+                            printf("%lld ", num);
+                        }
+                        printf("\n");
+                    }
+
+                    ProcessOneReport(altReportNumList, isSafeWithProblemDampener, verbose);
+                    if (isSafeWithProblemDampener)
+                    {
+                        ++numSafeReportsWithDampener;
+                        if (verbose)
+                            printf("SAFE because we DID find a with-problem-dampener safe option\n");
+                        break;
+                    }
+
+                    if (indexToPatch < 0)
+                    {
+                        if (verbose)
+                            printf("UNSAFE because could not find a with-problem-dampener safe option\n");
+                        break;
+                    }
+
+                    // patch alt list, to test next one-item-removed combination
+                    altReportNumList[indexToPatch] = reportNumList[indexToPatch + 1];
+                    --indexToPatch;
+                }
+            }
         }
 
-        printf("Num safe reports = %lld\n\n", numSafeReports);
+        printf("Num safe reports = %lld, num safe reports with problem dampener = %lld\n\n", numSafeReports, numSafeReportsWithDampener);
     }
 };
 
