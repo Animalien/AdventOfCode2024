@@ -13,15 +13,20 @@ FactorizationCache g_factorizationCache;
 ////////////////////////////
 // Strings
 
-void ReadFileLines(const char* fileName, StringList& lines)
+FILE* OpenInputFile(const char* fileName)
 {
-    static const char* fileNameBase = "..\\Input\\";
-
-    lines.clear();
+    static const char* const fileNameBase = "..\\Input\\";
 
     std::string fullFileName = fileNameBase;
     fullFileName += fileName;
-    FILE* pFile = fopen(fullFileName.c_str(), "rt");
+    return fopen(fullFileName.c_str(), "rt");
+}
+
+void ReadFileLines(const char* fileName, StringList& lines)
+{
+    lines.clear();
+
+    FILE* pFile = OpenInputFile(fileName);
     assert(pFile);
 
     char string[1024];
@@ -79,7 +84,7 @@ void ParseBigIntList(const std::string& st, BigIntList& intList, char delim)
     intList.clear();
     for (const auto& intString: tokens)
     {
-        intList.push_back(atoll(intString.c_str()));
+        intList.push_back(StringToBigInt(intString));
     }
 }
 

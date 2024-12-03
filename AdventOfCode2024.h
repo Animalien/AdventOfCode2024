@@ -43,7 +43,7 @@ const BigInt MAX_BIG_UINT = ULLONG_MAX;
 
 typedef std::vector<bool> BoolList;
 
-#define BigIntAbs(bi) llabs(bi)
+inline BigInt BigIntAbs(BigInt i) { return llabs(i); }
 
 
 ////////////////////////////
@@ -199,8 +199,12 @@ typedef std::set<std::string> StringSet;
 typedef std::map<std::string, std::string> StringMap;
 typedef std::unordered_set<std::string> UnorderedStringSet;
 
+FILE* OpenInputFile(const char* fileName);
 void ReadFileLines(const char* fileName, StringList& lines);
 void Tokenize(const std::string& st, StringList& tokens, char delim);
+
+inline BigInt StringToBigInt(const std::string& st) { return atoll(st.c_str()); }
+
 void ParseBigIntList(const std::string& st, BigIntList& intList, char delim);
 bool ParseNextBigInt(const char*& st, BigInt& num, bool checkForNegation = false);
 bool StringHasDigits(const std::string& st, BigInt start = 0, BigInt end = -1);
