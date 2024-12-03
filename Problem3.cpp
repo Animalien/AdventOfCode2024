@@ -13,26 +13,37 @@ public:
 
     virtual void Run() override
     {
-        RunOnData("Day3Example.txt", true);
-        RunOnData("Day3Input.txt", false);
+        RunOnData("Day3Example.txt", false, true);
+        RunOnData("Day3Input.txt", false, false);
+        RunOnData("Day3Example2.txt", true, true);
+        RunOnData("Day3Input.txt", true, false);
     }
 
 private:
     enum class State
     {
         Nothing,
+
         M,
         U,
         L,
-        OpenParen,
+        OpenParenMul,
         Arg1,
         Comma,
         Arg2,
+
+        D,
+        O,
+        N,
+        Apostrophe,
+        T,
+        OpenParenDo,
+        OpenParenDont,
     };
 
-    void RunOnData(const char* filename, bool verbose)
+    void RunOnData(const char* filename, bool enableDisable, bool verbose)
     {
-        printf("Running on data in file '%s':\n", filename);
+        printf("Running on data in file '%s'%s:\n", filename, enableDisable ? "with mul enable/disable" : "");
 
         FILE* pFile = OpenInputFile(filename);
         assert(pFile);
@@ -42,6 +53,8 @@ private:
         std::string arg2;
 
         BigInt runningProductTotal = 0;
+
+        bool mulsAreEnabled = true;
 
         int chInt = EOF;
         for (;;)
@@ -57,7 +70,10 @@ private:
                 case State::Nothing:
                     if (ch == 'm')
                         state = State::M;
+                    else if (enableDisable && (ch == 'd'))
+                        state = State::D;
                     break;
+
                 case State::M:
                     if (ch == 'u')
                         state = State::U;
@@ -72,11 +88,11 @@ private:
                     break;
                 case State::L:
                     if (ch == '(')
-                        state = State::OpenParen;
+                        state = State::OpenParenMul;
                     else
                         state = State::Nothing;
                     break;
-                case State::OpenParen:
+                case State::OpenParenMul:
                     if (std::isdigit(chInt))
                     {
                         state = State::Arg1;
@@ -121,34 +137,96 @@ private:
                     {
                         if (ch == ')')
                         {
-                            // finalize a valid instruction!
+                            if (enableDisable && !mulsAreEnabled)
+                            {
+                                if (verbose)
+                                {
+                                    const BigInt i1 = StringToBigInt(arg1);
+                                    const BigInt i2 = StringToBigInt(arg2);
 
-                            const BigInt i1 = StringToBigInt(arg1);
-                            const BigInt i2 = StringToBigInt(arg2);
+                                    printf(
+                                        "  found a valid mul instruction mul(%lld,%lld), but ignoring because muls are currently disabled\n",
+                                        i1,
+                                        i2);
+                                }
+                            }
+                            else
+                            {
+                                // finalize a valid instruction!
 
-                            const BigInt product = i1 * i2;
+                                const BigInt i1 = StringToBigInt(arg1);
+                                const BigInt i2 = StringToBigInt(arg2);
 
-                            runningProductTotal += product;
+                                const BigInt product = i1 * i2;
 
-                            if (verbose)
-                                printf(
-                                    "found a valid mul instruction mul(%lld,%lld);  product = %lld and running product total now = %lld\n",
-                                    i1,
-                                    i2,
-                                    product,
-                                    runningProductTotal);
+                                runningProductTotal += product;
+
+                                if (verbose)
+                                    printf(
+                                        "  found a valid mul instruction mul(%lld,%lld);  product = %lld and running product total now = %lld\n",
+                                        i1,
+                                        i2,
+                                        product,
+                                        runningProductTotal);
+                            }
                         }
 
                         state = State::Nothing;
                     }
                     break;
+
+                case State::D:
+                    if (ch == 'o')
+                        state = State::O;
+                    else
+                        state = State::Nothing;
+                    break;
+                case State::O:
+                    if (ch == '(')
+                        state = State::OpenParenDo;
+                    else if (ch == 'n')
+                        state = State::N;
+                    else
+                        state = State::Nothing;
+                    break;
+                case State::N:
+                    if (ch == '\'')
+                        state = State::Apostrophe;
+                    else
+                        state = State::Nothing;
+                    break;
+                case State::Apostrophe:
+                    if (ch == 't')
+                        state = State::T;
+                    else
+                        state = State::Nothing;
+                    break;
+                case State::T:
+                    if (ch == '(')
+                        state = State::OpenParenDont;
+                    else
+                        state = State::Nothing;
+                    break;
+                case State::OpenParenDo:
+                    mulsAreEnabled = true;
+                    if (verbose)
+                        printf("  enabling muls\n");
+                    state = State::Nothing;
+                    break;
+                case State::OpenParenDont:
+                    mulsAreEnabled = false;
+                    if (verbose)
+                        printf("  disabling muls\n");
+                    state = State::Nothing;
+                    break;
+
                 default:
                     assert(false);
                     break;
             }
         }
 
-        printf("Product total of valid mul instructions = %lld\n\n", runningProductTotal);
+        printf("  Product total of valid mul instructions = %lld\n\n", runningProductTotal);
     }
 };
 
