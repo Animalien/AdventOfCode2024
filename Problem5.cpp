@@ -45,6 +45,7 @@ private:
         // go through the updates
 
         BigInt middlePageNumberSum = 0;
+        BigInt fixedMiddlePageNumberSum = 0;
 
         for (; lineIndex < (BigInt)lines.size(); ++lineIndex)
         {
@@ -57,56 +58,79 @@ private:
 
             bool breaksAnyRules = false;
 
-            // num 1 starts from end of list and goes to index # 1
-            // num 2 starts from just left of num 1, and goes to index # 0
-            // therefore, num 2 is before num 1 in this update
-            // we want to find out if any num 1 is instead supposed to go before a num 2
+            // numRight starts from end of list and goes to index # 1
+            // numLeft starts from just left of numRight, and goes to index # 0
+            // therefore, numLeft is indeed always left of numRight in this update
+            // we want to find out if any numRight is instead supposed to go before a numLeft
             //
             // a visual example of a pair being tested in the update list:
-            // 
-            //      | - - - - num2 - - - - num1 - - - |
+            //
+            //      | - - - - numLeft - - - - numRight - - - |
             //
 
-            const BigInt testIndex1Start = (BigInt)numList.size() - 1;
-            for (BigInt testIndex1 = testIndex1Start; testIndex1 >= 1; --testIndex1)
+            const BigInt testIndexRightStart = (BigInt)numList.size() - 1;
+            for (BigInt testIndexRight = testIndexRightStart; testIndexRight >= 1; --testIndexRight)
             {
-                const BigInt num1 = numList[testIndex1];
+                const BigInt numRight = numList[testIndexRight];
 
-                for (BigInt testIndex2 = testIndex1 - 1; testIndex2 >= 0; --testIndex2)
+                for (BigInt testIndexLeft = testIndexRight - 1; testIndexLeft >= 0; --testIndexLeft)
                 {
-                    const BigInt num2 = numList[testIndex2];
+                    const BigInt numLeft = numList[testIndexLeft];
 
                     // check pair to see if num1 must come before num2
 
-                    const BigIntUnorderedMapSet::const_iterator findIter = pairMapSet.find(num1);
-                    if ((findIter != pairMapSet.end()) && (findIter->second.count(num2) > 0))
+                    const BigIntUnorderedMapSet::const_iterator findIter = pairMapSet.find(numRight);
+                    if ((findIter != pairMapSet.end()) && (findIter->second.count(numLeft) > 0))
                     {
-                        // num1 is indeed supposed to come before num2, therefore this update is BAD
+                        // numRight is indeed supposed to come before numLeft, therefore this update is BAD
 
                         if (verbose)
-                            printf("    this update breaks the rule \"%lld comes before %lld\"\n", num1, num2);
+                            printf("    this update breaks the rule \"%lld comes before %lld\"\n", numRight, numLeft);
 
                         breaksAnyRules = true;
-                        break;
+
+                        // fix this update with respect to this pair
+
+                        FixPairInUpdate(numList, pairMapSet, testIndexLeft, testIndexRight);
+
+                        // now continue finding other pairs to fix
                     }
                 }
-
-                if (breaksAnyRules)
-                    break;
             }
+
+            const BigInt middlePageNumber = numList[numList.size() / 2];
 
             if (!breaksAnyRules)
             {
-                const BigInt middlePageNumber = numList[numList.size() / 2];
-
                 middlePageNumberSum += middlePageNumber;
 
                 if (verbose)
                     printf("    this update is VALID!  its middle page number is %lld\n", middlePageNumber);
             }
+            else
+            {
+                fixedMiddlePageNumberSum += middlePageNumber;
+
+                if (verbose)
+                    printf("    this update was invalid, but we fixed it.  its new middle page number is %lld\n", middlePageNumber);
+            }
         }
 
-        printf("  Middle page number sum = %lld\n\n", middlePageNumberSum);
+        printf(
+            "  Middle page number sum = %lld, Fixed middle page number sum = %lld\n\n",
+            middlePageNumberSum,
+            fixedMiddlePageNumberSum);
+    }
+
+    void FixPairInUpdate(BigIntList& numList, const BigIntUnorderedMapSet& pairMapSet, BigInt testIndexLeft, BigInt testIndexRight)
+    {
+        // fix in such a way that we don't invalidate any pairs when we move numbers
+        // basically move the number at testIndexLeft as far to the right as we can, either just past testIndexRight, or until it can't be further moved without breaking rules
+        // if we weren't able to fix it that way, move the number at testIndexRight as far left as we can until it goes past testIndexLeft
+
+        //for (;;)
+        //{
+        //}
     }
 };
 
