@@ -34,6 +34,7 @@ typedef std::set<BigInt> BigIntSet;
 typedef std::multiset<BigInt> BigIntMultiSet;
 typedef std::unordered_set<BigInt> BigIntUnorderedSet;
 typedef std::deque<BigInt> BigIntDeque;
+typedef std::unordered_map<BigInt, std::unordered_set<BigInt>> BigIntUnorderedMapSet;
 
 typedef unsigned long long BigUInt;
 
