@@ -77,10 +77,9 @@ private:
                 {
                     const BigInt numLeft = numList[testIndexLeft];
 
-                    // check pair to see if num1 must come before num2
+                    // check pair to see if numRight must come before numLeft
 
-                    const BigIntUnorderedMapSet::const_iterator findIter = pairMapSet.find(numRight);
-                    if ((findIter != pairMapSet.end()) && (findIter->second.count(numLeft) > 0))
+                    if (!NumbersAreInValidOrder(pairMapSet, numLeft, numRight))
                     {
                         // numRight is indeed supposed to come before numLeft, therefore this update is BAD
 
@@ -94,6 +93,7 @@ private:
                         FixPairInUpdate(numList, pairMapSet, testIndexLeft, testIndexRight);
 
                         // now continue finding other pairs to fix
+                        // (we can continue with these test indices because we already ensured everything else between them and to the right is still valid)
                     }
                 }
             }
@@ -120,6 +120,22 @@ private:
             "  Middle page number sum = %lld, Fixed middle page number sum = %lld\n\n",
             middlePageNumberSum,
             fixedMiddlePageNumberSum);
+    }
+
+    bool NumbersAreInValidOrder(const BigIntUnorderedMapSet& pairMapSet, BigInt numLeft, BigInt numRight)
+    {
+        const BigIntUnorderedMapSet::const_iterator findIter = pairMapSet.find(numRight);
+
+        // numRight is not even in rule set, so don't worry
+        if (findIter == pairMapSet.end())
+            return true;
+
+        // numRight|numLeft are in rule set, so this pairing is bad
+        if (findIter->second.count(numLeft) > 0)
+            return false;
+
+        // we are fine
+        return true;
     }
 
     void FixPairInUpdate(BigIntList& numList, const BigIntUnorderedMapSet& pairMapSet, BigInt testIndexLeft, BigInt testIndexRight)
