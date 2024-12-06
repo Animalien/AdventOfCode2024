@@ -46,6 +46,8 @@ typedef std::vector<bool> BoolList;
 
 inline BigInt BigIntAbs(BigInt i) { return llabs(i); }
 
+void PrintBigIntList(const BigIntList& intList, bool endLine = true);
+
 
 ////////////////////////////
 // Factorization

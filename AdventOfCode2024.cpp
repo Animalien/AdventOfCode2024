@@ -11,6 +11,19 @@ FactorizationCache g_factorizationCache;
 
 
 ////////////////////////////
+// Basic Types
+
+void PrintBigIntList(const BigIntList& intList, bool endLine /*= true*/)
+{
+    printf("%lld", intList[0]);
+    for (BigInt i = 1; i < (BigInt)intList.size(); ++i)
+        printf(",%lld", intList[i]);
+    if (endLine)
+        printf("\n");
+}
+
+
+////////////////////////////
 // Strings
 
 FILE* OpenInputFile(const char* fileName)
