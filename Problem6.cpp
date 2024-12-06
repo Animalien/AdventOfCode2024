@@ -22,23 +22,27 @@ private:
     static const char sm_emptySpace = '.';
     static const char sm_obstacle = '#';
     static const char sm_visited = 'X';
+    static const std::array<BigInt, 4> sm_xInc;
+    static const std::array<BigInt, 4> sm_yInc;
+
 
     void RunOnData(const char* filename, bool verbose)
     {
-        static const std::array<BigInt, 4> xInc = { 0, +1, 0, -1 };
-        static const std::array<BigInt, 4> yInc = { -1, 0, +1, 0 };
-
         printf("Running on data in file '%s':\n", filename);
 
         StringList grid;
         ReadFileLines(filename, grid);
 
-        BigInt xPos = 0;
-        BigInt yPos = 0;
-        BigInt facing = 0;
-        FindGuardPositionAndFacing(grid, xPos, yPos, facing);
+        BigInt startXPos = 0;
+        BigInt startYPos = 0;
+        BigInt startFacing = 0;
+        FindGuardPositionAndFacing(grid, startXPos, startYPos, startFacing);
 
-        grid[yPos][xPos] = sm_emptySpace;
+        grid[startYPos][startXPos] = sm_emptySpace;
+
+        BigInt xPos = startXPos;
+        BigInt yPos = startYPos;
+        BigInt facing = startFacing;
 
         // first march the guard around until they move off the grid, using The Algorithm
 
@@ -49,8 +53,8 @@ private:
             if (verbose)
                 PrintGrid(grid);
 
-            const BigInt nextXPos = xPos + xInc[facing];
-            const BigInt nextYPos = yPos + yInc[facing];
+            const BigInt nextXPos = xPos + sm_xInc[facing];
+            const BigInt nextYPos = yPos + sm_yInc[facing];
 
             if ((nextXPos < 0) || (nextXPos >= (BigInt)grid[yPos].size()) || (nextYPos < 0) || (nextYPos >= (BigInt)grid.size()))
             {
@@ -79,6 +83,26 @@ private:
         }
 
         printf("  Num visited spaces = %lld\n\n", numVisitedSpaces);
+
+        ////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
+        // now let's see where we can place an obstacle to cause a loop
+        // note an obstacle must be placed only in a visited position -- marked by an X
+
+        BigInt numObstacles = 0;
+        for (BigInt obsY = 0; obsY < (BigInt)grid.size(); ++obsY)
+        {
+            for (BigInt obsX = 0; obsX < (BigInt)grid[yPos].size(); ++obsX)
+            {
+                if (grid[obsY][obsX] != sm_visited)
+                    continue;
+
+                if (DoesObstacleCauseLoop(startXPos, startYPos, startFacing, obsX, obsY, grid, verbose))
+                    ++numObstacles;
+            }
+        }
+
+        printf("  Num obstacles that will cause a guard loop = %lld\n\n", numObstacles);
     }
 
     void FindGuardPositionAndFacing(const StringList& grid, BigInt& xPos, BigInt& yPos, BigInt& facing)
@@ -118,8 +142,79 @@ private:
             printf("  %s\n", gridLine.c_str());
         printf("\n");
     }
+
+    typedef std::vector<BigIntList> VisitationRecordBank;
+
+    bool DoesObstacleCauseLoop(BigInt guardXPos, BigInt guardYPos, BigInt guardFacing, BigInt obsX, BigInt obsY, StringList& grid, bool verbose)
+    {
+        static VisitationRecordBank visitations;
+        visitations.resize(grid.size(), BigIntList(grid[0].size(), 0));
+        for (BigIntList& visitRow: visitations)
+        {
+            visitRow.clear();
+            visitRow.resize(grid[0].size(), 0);
+        }
+
+        grid[obsY][obsX] = sm_obstacle;
+        bool looped = false;
+        for (;;)
+        {
+            const BigInt currVisitation = 1LL << guardFacing;
+
+            BigInt& visitation = visitations[guardYPos][guardXPos];
+            if (visitation & currVisitation)
+            {
+                looped = true;
+                break;
+            }
+
+            visitation |= currVisitation;
+
+            const BigInt nextXPos = guardXPos + sm_xInc[guardFacing];
+            const BigInt nextYPos = guardYPos + sm_yInc[guardFacing];
+
+            if ((nextXPos < 0) || (nextXPos >= (BigInt)grid[guardYPos].size()) ||
+                (nextYPos < 0) || (nextYPos >= (BigInt)grid.size()))
+                break;
+
+            if (grid[nextYPos][nextXPos] == sm_obstacle)
+            {
+                guardFacing = (guardFacing + 1) % sm_facings.size();
+            }
+            else
+            {
+                guardXPos = nextXPos;
+                guardYPos = nextYPos;
+            }
+        }
+        grid[obsY][obsX] = sm_visited;
+
+        if (looped && verbose)
+            PrintVisitationRecordGrid(grid, visitations);
+
+        return looped;
+    }
+
+    void PrintVisitationRecordGrid(const StringList& grid, const VisitationRecordBank& visitations)
+    {
+        for (BigInt yPos = 0; yPos < (BigInt)grid.size(); ++yPos)
+        {
+            printf("  ");
+            for (BigInt xPos = 0; xPos < (BigInt)grid[yPos].size(); ++xPos)
+            {
+                if (visitations[yPos][xPos] > 0)
+                    printf("+");
+                else
+                    printf("%c", (int)grid[yPos][xPos]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
 };
 
 const std::string Problem6::sm_facings = "^>v<";
+const std::array<BigInt, 4> Problem6::sm_xInc = { 0, +1, 0, -1 };
+const std::array<BigInt, 4> Problem6::sm_yInc = { -1, 0, +1, 0 };
 
 Problem6 problem6;
