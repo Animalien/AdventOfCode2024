@@ -151,8 +151,8 @@ private:
     void FixPairInUpdate(BigIntList& numList, const BigIntUnorderedMapSet& pairMapSet, BigInt testIndexLeft, BigInt testIndexRight, bool verbose)
     {
         // fix in such a way that we don't invalidate any pairs when we move numbers
-        // basically move the number at testIndexLeft as far to the right as we can, either just past testIndexRight, or until it can't be further moved without breaking rules
-        // if we weren't able to fix it that way, move the number at testIndexRight as far left as we can until it goes past testIndexLeft
+        // basically move the number at testIndexLeft as far to the right as we can, either adjacent to testIndexRight, or until it can't be further moved without breaking rules
+        // if we weren't able to fix it that way, move the number at testIndexRight as far left as we can until it is adjacent to testIndexLeft
 
         // try to nudge left number rightward
         for (;;)
