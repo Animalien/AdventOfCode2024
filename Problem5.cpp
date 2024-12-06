@@ -71,12 +71,8 @@ private:
             const BigInt testIndexRightStart = (BigInt)numList.size() - 1;
             for (BigInt testIndexRight = testIndexRightStart; testIndexRight >= 1; --testIndexRight)
             {
-                //const BigInt numRight = numList[testIndexRight];
-
                 for (BigInt testIndexLeft = testIndexRight - 1; testIndexLeft >= 0; --testIndexLeft)
                 {
-                    //const BigInt numLeft = numList[testIndexLeft];
-
                     // check pair to see if numRight must come before numLeft
 
                     if (!NumbersAreInValidOrder(pairMapSet, numList[testIndexLeft], numList[testIndexRight]))
