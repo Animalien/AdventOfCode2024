@@ -13,6 +13,7 @@ add_executable(AdventOfCode2024
 	Problem4.cpp
 	Problem5.cpp
 	Problem6.cpp
+	Problem7.cpp
 	_clang-format
 )
 
