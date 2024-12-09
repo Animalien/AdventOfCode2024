@@ -10,8 +10,11 @@ public:
 
     virtual void Run() override
     {
-        RunOnData("Day8Example.txt", true);
-        RunOnData("Day8Input.txt", false);
+        RunOnData("Day8Example.txt", false, true);
+        RunOnData("Day8Input.txt", false, false);
+
+        RunOnData("Day8Example.txt", true, true);
+        RunOnData("Day8Input.txt", true, false);
     }
 
 private:
@@ -26,9 +29,9 @@ private:
     static const char sm_empty = '.';
     static const char sm_antinode = '#';
 
-    void RunOnData(const char* filename, bool verbose)
+    void RunOnData(const char* filename, bool withHarmonics, bool verbose)
     {
-        printf("Running on data in file '%s':\n", filename);
+        printf("Running on data in file '%s', %s harmonics:\n", filename, withHarmonics ? "with" : "without");
 
         StringList antennaGrid;
         ReadFileLines(filename, antennaGrid);
@@ -64,7 +67,7 @@ private:
 
             // pair up the antennas to find antinodes
 
-            for (BigInt i = 0; i < (BigInt)coordsList.size(); ++i)
+            for (BigInt i = 0; i < ((BigInt)coordsList.size()-1); ++i)
             {
                 for (BigInt j = i + 1; j < (BigInt)coordsList.size(); ++j)
                 {
@@ -73,14 +76,61 @@ private:
 
                     const Coords diff = { antenna2.x - antenna1.x, antenna2.y - antenna1.y };
 
-                    const Coords antinode1 = { antenna1.x - diff.x, antenna1.y - diff.y };
-                    const Coords antinode2 = { antenna2.x + diff.x, antenna2.y + diff.y };
+                    if (!withHarmonics)
+                    {
+                        const Coords antinode1 = { antenna1.x - diff.x, antenna1.y - diff.y };
+                        const Coords antinode2 = { antenna2.x + diff.x, antenna2.y + diff.y };
 
-                    if (PlotAntinode(antinodeGrid, antinode1.x, antinode1.y))
-                        ++totalNumAntinodes;
+                        bool newAntinode = false;
+                        bool outOfBounds = false;
 
-                    if (PlotAntinode(antinodeGrid, antinode2.x, antinode2.y))
-                        ++totalNumAntinodes;
+                        PlotAntinode(antinodeGrid, antinode1, newAntinode, outOfBounds);
+                        if (newAntinode)
+                            ++totalNumAntinodes;
+
+                        PlotAntinode(antinodeGrid, antinode2, newAntinode, outOfBounds);
+                        if (newAntinode)
+                            ++totalNumAntinodes;
+                    }
+                    else
+                    {
+                        const Coords step = CalcMinimalDiff(antenna1, antenna2);
+
+                        bool newAntinode = false;
+                        bool outOfBounds = false;
+
+                        // step forward from antenna1
+
+                        Coords curr = antenna1;
+                        for (;;)
+                        {
+                            PlotAntinode(antinodeGrid, curr, newAntinode, outOfBounds);
+                            if (outOfBounds)
+                                break;
+
+                            if (newAntinode)
+                                ++totalNumAntinodes;
+
+                            curr.x += step.x;
+                            curr.y += step.y;
+                        }
+
+                        // step backwards from antenna1
+
+                        curr = Coords { antenna1.x - step.x, antenna1.y - step.y };
+                        for (;;)
+                        {
+                            PlotAntinode(antinodeGrid, curr, newAntinode, outOfBounds);
+                            if (outOfBounds)
+                                break;
+
+                            if (newAntinode)
+                                ++totalNumAntinodes;
+
+                            curr.x -= step.x;
+                            curr.y -= step.y;
+                        }
+                    }
                 }
             }
         }
@@ -97,17 +147,40 @@ private:
         printf("  Total num antinodes = %lld\n\n", totalNumAntinodes);
     }
 
-    bool PlotAntinode(StringList& antinodeGrid, BigInt x, BigInt y)
+    void PlotAntinode(StringList& antinodeGrid, const Coords& coords, bool& newAntinode, bool& outOfBounds)
     {
-        if ((x < 0) || (x >= (BigInt)antinodeGrid[0].size()) || (y < 0) || (y >= (BigInt)antinodeGrid.size()))
-            return false;
+        if ((coords.x < 0) || (coords.x >= (BigInt)antinodeGrid[0].size()) ||
+            (coords.y < 0) || (coords.y >= (BigInt)antinodeGrid.size()))
+        {
+            newAntinode = false;
+            outOfBounds = true;
+            return;
+        }
 
-        if (antinodeGrid[y][x] == sm_antinode)
-            return false;
+        if (antinodeGrid[coords.y][coords.x] == sm_antinode)
+        {
+            newAntinode = false;
+            outOfBounds = false;
+            return;
+        }
 
-        antinodeGrid[y][x] = sm_antinode;
+        antinodeGrid[coords.y][coords.x] = sm_antinode;
 
-        return true;
+        newAntinode = true;
+        outOfBounds = false;
+    }
+
+    Coords CalcMinimalDiff(const Coords& coords1, const Coords& coords2)
+    {
+        const Coords diff = { coords2.x - coords1.x, coords2.y - coords1.y };
+        if (diff.x == 0)
+            return Coords { 0, (diff.y < 0) ? -1 : +1 };
+        if (diff.y == 0)
+            return Coords{ (diff.x < 0) ? -1 : +1, 0 };
+
+        const BigInt diffGCF = GetGreatestCommonFactor(std::abs(diff.x), std::abs(diff.y));
+
+        return Coords { diff.x / diffGCF, diff.y / diffGCF };
     }
 };
 

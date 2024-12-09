@@ -22,6 +22,14 @@ void PrintBigIntList(const BigIntList& intList, bool endLine /*= true*/)
         printf("\n");
 }
 
+BigInt GetGreatestCommonFactor(BigInt int1, BigInt int2)
+{
+    const Factorization& factoriz1 = g_factorizationCache.Factorize(int1);
+    const Factorization& factoriz2 = g_factorizationCache.Factorize(int2);
+
+    return factoriz1.GetGreatestCommonFactor(factoriz2);
+}
+
 
 ////////////////////////////
 // Strings

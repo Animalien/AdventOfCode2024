@@ -48,6 +48,8 @@ inline BigInt BigIntAbs(BigInt i) { return llabs(i); }
 
 void PrintBigIntList(const BigIntList& intList, bool endLine = true);
 
+BigInt GetGreatestCommonFactor(BigInt int1, BigInt int2);
+
 
 ////////////////////////////
 // Factorization
@@ -109,6 +111,39 @@ public:
         numDivisors += 1;
 
         return numDivisors;
+    }
+
+    BigInt GetGreatestCommonFactor(const Factorization& rhs) const
+    {
+        BigInt gcf = 1;
+
+        BigIntMap::const_iterator lhsIter = this->cbegin();
+        BigIntMap::const_iterator rhsIter = rhs.cbegin();
+
+        for (;;)
+        {
+            if ((lhsIter == this->cend()) || (rhsIter == rhs.cend()))
+                return gcf;
+
+            if (lhsIter->first == rhsIter->first)
+            {
+                const BigInt minNumFactors = std::min(lhsIter->second, rhsIter->second);
+                for (BigInt i = 0; i < minNumFactors; ++i)
+                {
+                    gcf *= lhsIter->first;
+                }
+                ++lhsIter;
+                ++rhsIter;
+            }
+            else if (lhsIter->first < rhsIter->first)
+            {
+                ++lhsIter;
+            }
+            else
+            {
+                ++rhsIter;
+            }
+        }
     }
 
 private:
