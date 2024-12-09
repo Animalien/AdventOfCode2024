@@ -209,6 +209,7 @@ void Tokenize(const std::string& st, StringList& tokens, char delim);
 inline BigInt StringToBigInt(const std::string& st) { return atoll(st.c_str()); }
 
 void ParseBigIntList(const std::string& st, BigIntList& intList, char delim);
+void ConvertStringListToBigIntList(const StringList& stringList, BigIntList& intList);
 bool ParseNextBigInt(const char*& st, BigInt& num, bool checkForNegation = false);
 bool StringHasDigits(const std::string& st, BigInt start = 0, BigInt end = -1);
 bool StringHasLowerCaseAlphaNumeric(const std::string& st, BigInt start = 0, BigInt end = -1);

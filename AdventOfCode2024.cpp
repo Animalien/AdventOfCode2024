@@ -101,6 +101,15 @@ void ParseBigIntList(const std::string& st, BigIntList& intList, char delim)
     }
 }
 
+void ConvertStringListToBigIntList(const StringList& stringList, BigIntList& intList)
+{
+    intList.clear();
+    for (const std::string& st: stringList)
+    {
+        intList.push_back(StringToBigInt(st));
+    }
+}
+
 bool ParseNextBigInt(const char*& st, BigInt& num, bool checkForNegation)
 {
     num = 0;
