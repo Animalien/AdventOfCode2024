@@ -32,6 +32,7 @@ private:
         PeakMap peakMap;
 
         BigInt totalPeakVisitationScore = 0;
+        BigInt totalRating = 0;
         BigInt trailHeadCounter = 1;
         for (BigInt y = 0; y < (BigInt)grid.size(); ++y)
         {
@@ -45,16 +46,18 @@ private:
                     printf("  Starting a trail at trailhead %lld, %lld\n", x, y);
 
                 BigInt numPeaksVisited = 0;
-                Recurse(peakMap, trailHeadCounter, grid, x, y, currHeight, -1, numPeaksVisited, verbose);
+                BigInt trailheadRating = 0;
+                Recurse(peakMap, trailHeadCounter, grid, x, y, currHeight, -1, numPeaksVisited, totalRating, verbose);
                 totalPeakVisitationScore += numPeaksVisited;
+                totalRating += trailheadRating;
                 ++trailHeadCounter;
 
                 if (verbose)
-                    printf("    visited %lld peaks from here\n", numPeaksVisited);
+                    printf("    visited %lld peaks from here, trailhead rating = %lld\n", numPeaksVisited, trailheadRating);
             }
         }
 
-        printf("  Total peak visitation score = %lld\n", totalPeakVisitationScore);
+        printf("  Total peak visitation score = %lld, total rating = %lld\n", totalPeakVisitationScore, totalRating);
     }
 
     void Recurse(
@@ -66,6 +69,7 @@ private:
         BigInt currHeight,
         BigInt lastMovedDir,
         BigInt& numPeaksVisited,
+        BigInt& totalRating,
         bool verbose)
     {
         if (currHeight >= 9)
@@ -79,6 +83,10 @@ private:
                 if (verbose)
                     printf("    visited peak at %lld, %lld\n", x, y);
             }
+
+            ++totalRating;
+            if (verbose)
+                printf("    ended unique valid trail at %lld, %lld\n", x, y);
 
             return;
         }
@@ -98,7 +106,7 @@ private:
             if (nextHeight != nextDesiredHeight)
                 continue;
 
-            Recurse(peakMap, trailHeadCounter, grid, nextX, nextY, nextHeight, dir, numPeaksVisited, verbose);
+            Recurse(peakMap, trailHeadCounter, grid, nextX, nextY, nextHeight, dir, numPeaksVisited, totalRating, verbose);
         }
     }
 
