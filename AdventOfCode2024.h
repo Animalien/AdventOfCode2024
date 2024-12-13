@@ -5,6 +5,7 @@
 #include <cctype>
 #include <deque>
 #include <limits.h>
+#include <list>
 #include <map>
 #include <set>
 #include <sstream>
@@ -28,6 +29,7 @@ typedef long long BigInt;
 typedef std::initializer_list<BigInt> BigIntInitList;
 typedef std::vector<BigInt> BigIntList;
 typedef std::vector<BigIntList> BigIntListList;
+typedef std::list<BigInt> BigIntLinkedList;
 typedef std::map<BigInt, BigInt> BigIntMap;
 typedef std::unordered_map<BigInt, BigInt> BigIntUnorderedMap;
 typedef std::set<BigInt> BigIntSet;
@@ -238,12 +240,25 @@ typedef std::map<std::string, std::string> StringMap;
 typedef std::unordered_set<std::string> UnorderedStringSet;
 
 FILE* OpenInputFile(const char* fileName);
+void ReadFile(const char* fileName, std::string& text);
 void ReadFileLines(const char* fileName, StringList& lines);
 void Tokenize(const std::string& st, StringList& tokens, char delim);
 
 inline BigInt StringToBigInt(const std::string& st) { return atoll(st.c_str()); }
 
-void ParseBigIntList(const std::string& st, BigIntList& intList, char delim);
+template <typename ListType>
+void ParseBigIntList(const std::string& st, ListType& intList, char delim)
+{
+    StringList tokens;
+    Tokenize(st, tokens, delim);
+
+    intList.clear();
+    for (const auto& intString: tokens)
+    {
+        intList.push_back(StringToBigInt(intString));
+    }
+}
+
 void ConvertStringListToBigIntList(const StringList& stringList, BigIntList& intList);
 bool ParseNextBigInt(const char*& st, BigInt& num, bool checkForNegation = false);
 bool StringHasDigits(const std::string& st, BigInt start = 0, BigInt end = -1);

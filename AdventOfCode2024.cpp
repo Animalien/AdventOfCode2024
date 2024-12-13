@@ -43,6 +43,20 @@ FILE* OpenInputFile(const char* fileName)
     return fopen(fullFileName.c_str(), "rt");
 }
 
+void ReadFile(const char* fileName, std::string& text)
+{
+    text.clear();
+
+    FILE* pFile = OpenInputFile(fileName);
+    assert(pFile);
+
+    int chInt = '0';
+    while ((chInt = fgetc(pFile)) != EOF)
+    {
+        text += (char)chInt;
+    }
+}
+
 void ReadFileLines(const char* fileName, StringList& lines)
 {
     lines.clear();
@@ -94,18 +108,6 @@ void Tokenize(const std::string& st, StringList& tokens, char delim)
     {
         if (!token.empty())
             tokens.push_back(token);
-    }
-}
-
-void ParseBigIntList(const std::string& st, BigIntList& intList, char delim)
-{
-    StringList tokens;
-    Tokenize(st, tokens, delim);
-
-    intList.clear();
-    for (const auto& intString: tokens)
-    {
-        intList.push_back(StringToBigInt(intString));
     }
 }
 
