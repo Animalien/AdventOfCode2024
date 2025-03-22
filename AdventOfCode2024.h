@@ -505,6 +505,16 @@ void TestPermutationIterator(BigInt numEntries);
 
 
 ////////////////////////////
+// StringNum
+//      An integer number represented by a string.
+//      Can do addition + multiplication.
+
+class StringNum
+{
+};
+
+
+////////////////////////////
 // Problem Harness
 
 class ProblemBase

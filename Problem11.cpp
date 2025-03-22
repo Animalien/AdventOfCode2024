@@ -12,6 +12,7 @@ public:
     {
         RunOnData("Day11Example.txt", 25, 6);
         RunOnData("Day11Input.txt", 25, 6);
+        RunOnData("Day11Input.txt", 75, 6);
     }
 
 private:
